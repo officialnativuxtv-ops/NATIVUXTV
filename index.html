@@ -2,17 +2,16 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>NATIVUX TV</title>
+    <title>NATIVUX TV - Señal en Vivo</title>
     <style>
-        /* Se simplificaron los estilos para evitar errores de renderizado en TV antiguas */
         body { margin: 0; background: #000; color: white; height: 100vh; overflow: hidden; font-family: sans-serif; }
         .video-container { position: relative; width: 100%; height: 100%; background: #000; }
-        video { width: 100%; height: 100%; object-fit: contain; }
+        video { width: 100%; height: 100%; background: #000; }
         
         .logo {
             position: absolute; top: 30px; right: 40px;
             font-weight: bold; font-size: 24px; color: rgba(255,255,255,0.5);
-            z-index: 15; text-shadow: 2px 2px 4px #000;
+            text-shadow: 2px 2px 4px #000; z-index: 15;
         }
 
         .epg-guide {
@@ -24,19 +23,17 @@
 
         .bumper {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #0b0b0b; color: #fff; display: none;
+            background: #0b0b0b; color: #fff; display: none; 
             justify-content: center; align-items: center;
             font-size: 35px; font-weight: bold; z-index: 25; text-transform: uppercase;
         }
-        
         .bumper span { color: #ff0000; margin-left: 10px; }
 
         .btn-inicio { 
-            position: absolute; top: 50%; left: 50%; 
-            transform: translate(-50%, -50%);
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             z-index: 30; padding: 20px 40px; font-size: 22px; 
-            background: #ff0000; color: white; border: none; 
-            cursor: pointer; font-weight: bold; border-radius: 5px; 
+            background: #ff0000; color: white; border: none; cursor: pointer; 
+            font-weight: bold; border-radius: 5px; 
         }
     </style>
 </head>
@@ -61,7 +58,6 @@
     </div>
 
     <script>
-        // Se cambió a funciones tradicionales (function) porque webOS 3.9 suele fallar con => (Arrow Functions)
         var player = document.getElementById('tvPlayer');
         var epg = document.getElementById('epg');
         var currentTitle = document.getElementById('currentTitle');
@@ -77,8 +73,9 @@
             { nombre: "Betty Toon - Estrella Estrellada", url: "https://www.dropbox.com/scl/fi/cw3grhqcau2uu614oqqsf/y2mate.com-Betty-toon-estrella-estrellada_360p.mp4?rlkey=a5nimez2upz42bp7m871lrx2y&st=p2niircy&raw=1" },
             { nombre: "Los Simpsons, Cap13-Temp3", url: "https://www.dropbox.com/scl/fi/4a1kkx6odi9t1mn32j73n/03x13-Bart-y-la-radio.mp4?rlkey=875yipktjp8d5jdcpcdp0nhh7&st=yskrucx0&raw=1" },
             { nombre: "Huella de los Dinosaurios - Cap 1", url: "https://www.dropbox.com/scl/fi/crb2xdeb8xl2h6o4q4ea5/Huella-de-dinosaurios-Documental.mp4?rlkey=s3ak2vpqa70u9yryputyw1fg7&st=npi00kan&raw=1" },
-            { nombre: "Saint Seiya - Alma de Oro (Completa)", url: "https://www.dropbox.com/scl/fi/ifgbbmvnpjn9k4i5btyon/Saint-Seiya-Alma-de-Oro-Serie-Completa-2018_360P.mp4?rlkey=zcy64m0ya1kj4e912al7g0fks&st=zqqkotiu&raw=1" }
-            // ... Puedes reponer el resto de tu lista aquí igual que antes
+            { nombre: "Saint Seiya - Alma de Oro (Completa)", url: "https://www.dropbox.com/scl/fi/ifgbbmvnpjn9k4i5btyon/Saint-Seiya-Alma-de-Oro-Serie-Completa-2018_360P.mp4?rlkey=zcy64m0ya1kj4e912al7g0fks&st=zqqkotiu&raw=1" },
+            { nombre: "Betty Toon - SuperBici", url: "https://www.dropbox.com/scl/fi/atyiu9nj44zkduseem692/y2mate.com-Betty-Toons-La-super-bici_360p.mp4?rlkey=xo4y6n2yrvisb0qv2ed1zq81v&st=gkw039ns&raw=1" },
+            { nombre: "Gato con Botas - Hayao Miyazaki", url: "https://www.dropbox.com/scl/fi/546naezitkyqqz5ox14q4/EL-GATO-CON-BOTAS-Hayao-Miyasaki-Espa-ol-Latino_480p.mp4?rlkey=w6xkh7k6gyucqxvhgbxi882e9&st=sshu7tkv&raw=1" }
         ];
 
         function mostrarEPG() {
@@ -93,6 +90,11 @@
             var proximo = listaVideos[(indice + 1) % listaVideos.length];
             
             player.src = videoInfo.url;
+            
+            // MODIFICACIÓN PARA COMPATIBILIDAD LG 2017
+            player.setAttribute("preload", "auto");
+            player.setAttribute("crossorigin", "anonymous");
+            
             currentTitle.innerHTML = videoInfo.nombre;
             nextTitle.innerHTML = "Siguiente: " + proximo.nombre;
             
@@ -131,9 +133,8 @@
             }
         };
 
-        // Bloqueos de seguridad básicos
+        // Bloqueo de menú contextual para TV
         document.oncontextmenu = function() { return false; };
-
     </script>
 </body>
 </html>
