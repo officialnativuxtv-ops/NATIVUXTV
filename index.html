@@ -2,139 +2,64 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>NATIVUX TV - Señal en Vivo</title>
+    <title>NATIVUX TV</title>
     <style>
         body { margin: 0; background: #000; color: white; height: 100vh; overflow: hidden; font-family: sans-serif; }
         .video-container { position: relative; width: 100%; height: 100%; background: #000; }
         video { width: 100%; height: 100%; background: #000; }
-        
-        .logo {
-            position: absolute; top: 30px; right: 40px;
-            font-weight: bold; font-size: 24px; color: rgba(255,255,255,0.5);
-            text-shadow: 2px 2px 4px #000; z-index: 15;
-        }
-
-        .epg-guide {
-            position: absolute; bottom: 50px; left: 50px;
-            background: rgba(0, 0, 0, 0.9); color: white;
-            padding: 20px; border-left: 6px solid #ff0000;
-            z-index: 20; min-width: 300px; display: none;
-        }
-
-        .bumper {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #0b0b0b; color: #fff; display: none; 
-            justify-content: center; align-items: center;
-            font-size: 35px; font-weight: bold; z-index: 25; text-transform: uppercase;
-        }
-        .bumper span { color: #ff0000; margin-left: 10px; }
-
-        .btn-inicio { 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 30; padding: 20px 40px; font-size: 22px; 
-            background: #ff0000; color: white; border: none; cursor: pointer; 
-            font-weight: bold; border-radius: 5px; 
-        }
+        .logo { position: absolute; top: 30px; right: 40px; font-weight: bold; font-size: 24px; color: rgba(255,255,255,0.5); z-index: 15; }
+        .btn-inicio { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 30; padding: 20px 40px; font-size: 22px; background: #ff0000; color: white; border: none; font-weight: bold; border-radius: 5px; }
     </style>
 </head>
 <body>
 
     <div class="video-container">
         <div class="logo">NATIVUX TV</div>
-        
-        <div class="bumper" id="bumper">Estás viendo <span>NATIVUX TV</span></div>
-
-        <div class="epg-guide" id="epg">
-            <div style="font-size: 12px; color: #aaa;">AHORA:</div>
-            <div id="currentTitle" style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">Cargando...</div>
-            <div id="nextTitle" style="font-size: 14px; color: #00ff00; border-top: 1px solid #333; padding-top: 10px;">Siguiente: --</div>
-        </div>
-        
-        <video id="tvPlayer" playsinline>
+        <video id="tvPlayer" playsinline autoplay title="Nativux Video Player">
             <source src="" type="video/mp4">
         </video>
-
-        <button id="btnPlay" class="btn-inicio">SINTONIZAR SEÑAL</button>
+        <button id="btnPlay" class="btn-inicio" onclick="iniciarCanal()">SINTONIZAR SEÑAL</button>
     </div>
 
     <script>
         var player = document.getElementById('tvPlayer');
-        var epg = document.getElementById('epg');
-        var currentTitle = document.getElementById('currentTitle');
-        var nextTitle = document.getElementById('nextTitle');
         var btn = document.getElementById('btnPlay');
-        var bumper = document.getElementById('bumper');
 
-        var indiceActual = localStorage.getItem('nativux_index') ? parseInt(localStorage.getItem('nativux_index')) : 0;
-        var tiempoGuardado = localStorage.getItem('nativux_time') ? parseFloat(localStorage.getItem('nativux_time')) : 0;
-        var tiempoActual = 0;
-
+        // Lista de videos con el formato correcto para Dropbox
         var listaVideos = [
-            { nombre: "Betty Toon - Estrella Estrellada", url: "https://www.dropbox.com/scl/fi/cw3grhqcau2uu614oqqsf/y2mate.com-Betty-toon-estrella-estrellada_360p.mp4?rlkey=a5nimez2upz42bp7m871lrx2y&st=p2niircy&raw=1" },
-            { nombre: "Los Simpsons, Cap13-Temp3", url: "https://www.dropbox.com/scl/fi/4a1kkx6odi9t1mn32j73n/03x13-Bart-y-la-radio.mp4?rlkey=875yipktjp8d5jdcpcdp0nhh7&st=yskrucx0&raw=1" },
-            { nombre: "Huella de los Dinosaurios - Cap 1", url: "https://www.dropbox.com/scl/fi/crb2xdeb8xl2h6o4q4ea5/Huella-de-dinosaurios-Documental.mp4?rlkey=s3ak2vpqa70u9yryputyw1fg7&st=npi00kan&raw=1" },
-            { nombre: "Saint Seiya - Alma de Oro (Completa)", url: "https://www.dropbox.com/scl/fi/ifgbbmvnpjn9k4i5btyon/Saint-Seiya-Alma-de-Oro-Serie-Completa-2018_360P.mp4?rlkey=zcy64m0ya1kj4e912al7g0fks&st=zqqkotiu&raw=1" },
-            { nombre: "Betty Toon - SuperBici", url: "https://www.dropbox.com/scl/fi/atyiu9nj44zkduseem692/y2mate.com-Betty-Toons-La-super-bici_360p.mp4?rlkey=xo4y6n2yrvisb0qv2ed1zq81v&st=gkw039ns&raw=1" },
-            { nombre: "Gato con Botas - Hayao Miyazaki", url: "https://www.dropbox.com/scl/fi/546naezitkyqqz5ox14q4/EL-GATO-CON-BOTAS-Hayao-Miyasaki-Espa-ol-Latino_480p.mp4?rlkey=w6xkh7k6gyucqxvhgbxi882e9&st=sshu7tkv&raw=1" }
+            { url: "https://dl.dropboxusercontent.com/scl/fi/cw3grhqcau2uu614oqqsf/y2mate.com-Betty-toon-estrella-estrellada_360p.mp4?rlkey=a5nimez2upz42bp7m871lrx2y" },
+            { url: "https://dl.dropboxusercontent.com/scl/fi/4a1kkx6odi9t1mn32j73n/03x13-Bart-y-la-radio.mp4?rlkey=875yipktjp8d5jdcpcdp0nhh7" }
         ];
 
-        function mostrarEPG() {
-            epg.style.display = 'block';
-            setTimeout(function() {
-                epg.style.display = 'none';
-            }, 6000);
-        }
-
-        function cargarVideo(indice, startTime) {
-            var videoInfo = listaVideos[indice];
-            var proximo = listaVideos[(indice + 1) % listaVideos.length];
-            
-            player.src = videoInfo.url;
-            
-            // MODIFICACIÓN PARA COMPATIBILIDAD LG 2017
-            player.setAttribute("preload", "auto");
-            player.setAttribute("crossorigin", "anonymous");
-            
-            currentTitle.innerHTML = videoInfo.nombre;
-            nextTitle.innerHTML = "Siguiente: " + proximo.nombre;
-            
-            player.load();
-
-            player.onloadedmetadata = function() {
-                if (startTime > 0) { player.currentTime = startTime; }
-                player.play();
-                mostrarEPG();
-            };
-        }
-
-        btn.onclick = function() {
-            player.muted = false;
+        function iniciarCanal() {
             btn.style.display = 'none';
-            cargarVideo(indiceActual, tiempoGuardado);
-        };
+            player.muted = false;
+            
+            // Prueba con el primer video
+            var urlLimpia = listaVideos[0].url;
+            
+            // CAMBIO CLAVE: Usar dl.dropboxusercontent.com ayuda a evitar bloqueos en TVs viejas
+            player.src = urlLimpia;
+            player.load();
+            
+            // Intento de reproducción forzada
+            var playPromise = player.play();
+            if (playPromise !== undefined) {
+                playPromise.then(function() {
+                    console.log("Reproduciendo...");
+                }).catch(function(error) {
+                    console.log("Error: " + error);
+                    // Si falla, intentamos cargar de nuevo
+                    player.load();
+                    player.play();
+                });
+            }
+        }
 
         player.onended = function() {
-            indiceActual = (indiceActual + 1) % listaVideos.length;
-            localStorage.setItem('nativux_index', indiceActual);
-            localStorage.setItem('nativux_time', 0);
-            
-            bumper.style.display = 'flex';
-            setTimeout(function() {
-                cargarVideo(indiceActual, 0);
-                setTimeout(function() { bumper.style.display = 'none'; }, 1000);
-            }, 3000);
+            // Reiniciar o pasar al siguiente
+            iniciarCanal();
         };
-
-        player.ontimeupdate = function() { 
-            if (!player.seeking) {
-                tiempoActual = player.currentTime; 
-                localStorage.setItem('nativux_index', indiceActual);
-                localStorage.setItem('nativux_time', tiempoActual);
-            }
-        };
-
-        // Bloqueo de menú contextual para TV
-        document.oncontextmenu = function() { return false; };
     </script>
 </body>
 </html>
