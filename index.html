@@ -1,26 +1,4 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>NATIVUX TV - Señal en Vivo</title>
-    <style>
-        body { margin: 0; background: #000; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
-        .video-container { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
-        video { width: 100%; height: 100%; background: #000; cursor: none; }
-        
-        /* LOGO DEL CANAL */
-        .logo {
-            position: absolute; top: 30px; right: 40px;
-            font-weight: bold; font-size: 24px; color: rgba(255,255,255,0.5);
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5); z-index: 15;
-            letter-spacing: 2px; pointer-events: none;
-        }
-
-        /* GUÍA DE PROGRAMACIÓN (EPG) */
-        .epg-guide {
-            position: absolute; bottom: 50px; left: 50px;
-            background: rgba(0, 0, 0, 0.85); color: white;
-            padding: 20px; border-radius: 2px; border-left: 6px solid #ff0000;
             z-index: 20; min-width: 300px;
             transform: translateX(-120%); transition: transform 0.8s ease-in-out;
         }
@@ -84,26 +62,6 @@
             { nombre: "Betty Toon - Estrella Estrellada", url: "https://dl.dropboxusercontent.com/scl/fi/cw3grhqcau2uu614oqqsf/y2mate.com-Betty-toon-estrella-estrellada_360p.mp4?rlkey=a5nimez2upz42bp7m871lrx2y" },
             { nombre: "Los Simpsons, Cap13-Temp3", url: "https://dl.dropboxusercontent.com/scl/fi/4a1kkx6odi9t1mn32j73n/03x13-Bart-y-la-radio.mp4?rlkey=875yipktjp8d5jdcpcdp0nhh7" },
             { nombre: "Huella de los Dinosaurios - Cap 1", url: "https://dl.dropboxusercontent.com/scl/fi/crb2xdeb8xl2h6o4q4ea5/Huella-de-dinosaurios-Documental.mp4?rlkey=s3ak2vpqa70u9yryputyw1fg7" },
-            { nombre: "Saint Seiya - Alma de Oro (Completa)", url: "https://dl.dropboxusercontent.com/scl/fi/ifgbbmvnpjn9k4i5btyon/Saint-Seiya-Alma-de-Oro-Serie-Completa-2018_360P.mp4?rlkey=zcy64m0ya1kj4e912al7g0fks" },
-            { nombre: "Huella de los Dinosaurios - Cap 2", url: "https://dl.dropboxusercontent.com/scl/fi/cadj7tqhj00iqwvd30f0p/videoplayback-3.mp4?rlkey=5bon3k9e6o87a0tz59aig7je7" },
-            { nombre: "Huella de los Dinosaurios - Cap 3", url: "https://dl.dropboxusercontent.com/scl/fi/ooampyjihd25agdt5g8ci/videoplayback-4.mp4?rlkey=jsthdqi06n5ozh6rsc6lgd935" },
-            { nombre: "Kymatica - Geometria sagrada, Subtitulado", url: "https://dl.dropboxusercontent.com/scl/fi/gtib18ryu3ymthp2ne1iw/y2mate.com-Kymatica-Documental-en-Espa-ol-Sin-subtitulos_360p.mp4?rlkey=08j5qctnvxscvl6boy3iittew" },
-            { nombre: "South Park, Cap1-Temp1", url: "https://dl.dropboxusercontent.com/scl/fi/2tou4p7kpbhmq9624rsjr/Temp-1-Ep-01.mp4?rlkey=dadln3wnx29ojpgye9yp3j21h" },
-            { nombre: "South Park, Cap2-Temp1", url: "https://dl.dropboxusercontent.com/scl/fi/deshqvq136p5tio4citar/Temp-1-Ep-02.mp4?rlkey=5c4g9k27dmr5l1whvnrxuyx8r" },
-            { nombre: "South Park, Cap3-Temp1", url: "https://dl.dropboxusercontent.com/scl/fi/clxxo7o5a467gl94rpaxg/Temp-1-Ep-03.mp4?rlkey=txzkicxf7k7ld03jzxbnp3slk" },
-            { nombre: "South Park, Cap4-Temp1", url: "https://dl.dropboxusercontent.com/scl/fi/z00rrvf8cez0n0516go9p/Temp-1-Ep-04.mp4?rlkey=uxhimlxsl7xtu50cj761imu00" },
-            { nombre: "South Park, Cap5-Temp1", url: "https://dl.dropboxusercontent.com/scl/fi/h18b8geqitb25zxkh5041/Temp-1-Ep-05.mp4?rlkey=hsu6abe0xxp4qh7e1vpec7814" },
-            { nombre: "South Park, Cap6-Temp1", url: "https://dl.dropboxusercontent.com/scl/fi/dwxz5q2jwbs18ucm1tj5r/Temp-1-Ep-06.mp4?rlkey=avj1sin5slaohtzis7d9a7vh5" },
-            { nombre: "South Park, Cap7-Temp1", url: "https://dl.dropboxusercontent.com/scl/fi/diw1j5uw1is2tefrvy06k/Temp-1-Ep-07.mp4?rlkey=6rhbgwrnufbviqummpi5znrfe" },
-            { nombre: "South Park, Cap8-Temp1", url: "https://dl.dropboxusercontent.com/scl/fi/ty6i50xg5mat2v8644tj7/Temp-1-Ep-08.mp4?rlkey=iy898vn3b1bfvc32w79slc6jv" },
-            { nombre: "South Park, Cap9-Temp1", url: "https://dl.dropboxusercontent.com/scl/fi/exnbb9dtsglvgjurfr113/Temp-1-Ep-09.mp4?rlkey=w63plha3cwgccfvf830ntyn1y" },
-            { nombre: "South Park, Cap10-Temp1", url: "https://dl.dropboxusercontent.com/scl/fi/27lyjdayqcoofqawbzzgj/Temp-1-Ep-10.mp4?rlkey=2iuhpwcjgia3sdrzrkszlj0y6" },
-            { nombre: "South Park, Cap11-Temp1", url: "https://dl.dropboxusercontent.com/scl/fi/vg1mi9bak439835htz144/Temp-1-Ep-11.mp4?rlkey=w3a2ztu5jv5fmnz1vmbqfn143" },
-            { nombre: "South Park, Cap12-Temp1", url: "https://dl.dropboxusercontent.com/scl/fi/xvmg3e4nqccnp182wivpd/Temp-1-Ep-12.mp4?rlkey=wtmfytjaek2hx9ncotljd5kps" },
-            { nombre: "South Park, Cap13-Temp1", url: "https://dl.dropboxusercontent.com/scl/fi/r96kokjdqtkx8rhk3k80w/Temp-1-Ep-13.mp4?rlkey=rgsrppculrgm7xaj63789per4" },
-            { nombre: "South Park, Cap1-Temp2", url: "https://dl.dropboxusercontent.com/scl/fi/ceono0f7mb2cw3z96in1k/Temp-2-Ep-01.mp4?rlkey=pxhlwkqsszk76zgwfxwkv71s6" },
-            { nombre: "South Park, Cap2-Temp2", url: "https://dl.dropboxusercontent.com/scl/fi/5qd21ktjuo0jyuxhnpzp4/Temp-2-Ep-02.mp4?rlkey=8uxyscxytsf3wdl9z2hotk2lw" },
-            { nombre: "South Park, Cap3-Temp2", url: "https://dl.dropboxusercontent.com/scl/fi/9p9ffk5dj7ki6dq9twzgj/Temp-2-Ep-03.mp4?rlkey=6w4cgh6y70cvof41dr6s2msup" },
             { nombre: "South Park, Cap4-Temp2", url: "https://dl.dropboxusercontent.com/scl/fi/i3bask3la6rxuuh2054qm/Temp-2-Ep-04.mp4?rlkey=kjcuhqx8gxbo2lpmybwe3zcq0" },
             { nombre: "South Park, Cap5-Temp2", url: "https://dl.dropboxusercontent.com/scl/fi/u8fablnvzv9m42xatz7z4/Temp-2-Ep-05.mp4?rlkey=j1o3ihzq4fdkzb2f55tpwwe7n" },
             { nombre: "South Park, Cap6-Temp2", url: "https://dl.dropboxusercontent.com/scl/fi/xso2ari8y1zpx29cl8wp8/Temp-2-Ep-06.mp4?rlkey=ko9ioaqbcsndyqg9spgef0ely" },
