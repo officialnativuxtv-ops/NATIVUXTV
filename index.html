@@ -7,55 +7,22 @@
         body { margin: 0; background: #000; color: white; height: 100vh; overflow: hidden; font-family: sans-serif; }
         .video-container { position: relative; width: 100%; height: 100%; background: #000; }
         video { width: 100%; height: 100%; background: #000; }
-        
-        .logo { 
-            position: absolute; top: 30px; right: 40px; 
-            font-weight: bold; font-size: 24px; color: rgba(255,255,255,0.4); 
-            z-index: 15; text-shadow: 2px 2px 4px #000;
-        }
-
-        /* Cuadro de información del video (EPG) */
-        .epg-guide {
-            position: absolute; bottom: 50px; left: 50px;
-            background: rgba(0, 0, 0, 0.8); color: white;
-            padding: 15px 25px; border-left: 5px solid #ff0000;
-            z-index: 20; min-width: 350px; display: none;
-        }
-
-        /* Cortinilla entre videos */
-        .bumper {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; color: #fff; display: none; 
-            justify-content: center; align-items: center;
-            font-size: 40px; font-weight: bold; z-index: 25;
-        }
-        .bumper span { color: #ff0000; margin-left: 15px; }
-
-        .btn-inicio { 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 30; padding: 25px 50px; font-size: 24px; 
-            background: #ff0000; color: white; border: none; cursor: pointer; 
-            font-weight: bold; border-radius: 8px; box-shadow: 0 0 20px rgba(255,0,0,0.5);
-        }
+        .logo { position: absolute; top: 30px; right: 40px; font-weight: bold; font-size: 24px; color: rgba(255,255,255,0.4); z-index: 15; }
+        .epg-guide { position: absolute; bottom: 50px; left: 50px; background: #000; color: white; padding: 15px; border-left: 5px solid #ff0000; z-index: 20; min-width: 300px; display: none; }
+        .bumper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; color: #fff; display: none; justify-content: center; align-items: center; font-size: 30px; font-weight: bold; z-index: 25; }
+        .btn-inicio { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 30; padding: 20px 40px; font-size: 22px; background: #ff0000; color: white; border: none; font-weight: bold; border-radius: 8px; }
     </style>
 </head>
 <body>
 
     <div class="video-container">
         <div class="logo">NATIVUX TV</div>
-        
-        <div class="bumper" id="bumper">Sintonizando <span>NATIVUX TV</span></div>
-
+        <div class="bumper" id="bumper">Sintonizando NATIVUX TV...</div>
         <div class="epg-guide" id="epg">
-            <div style="font-size: 14px; color: #bbb; margin-bottom: 5px;">ESTÁS VIENDO:</div>
-            <div id="currentTitle" style="font-size: 22px; font-weight: bold; margin-bottom: 10px;">Cargando...</div>
-            <div id="nextTitle" style="font-size: 14px; color: #00ff00; border-top: 1px solid #444; padding-top: 8px;">Siguiente: --</div>
+            <div id="currentTitle" style="font-size: 20px; font-weight: bold;"></div>
+            <div id="nextTitle" style="font-size: 14px; color: #00ff00; margin-top: 5px;"></div>
         </div>
-        
-        <video id="tvPlayer" playsinline>
-            <source src="" type="video/mp4">
-        </video>
-
+        <video id="tvPlayer" playsinline></video>
         <button id="btnPlay" class="btn-inicio">SINTONIZAR SEÑAL</button>
     </div>
 
@@ -64,14 +31,12 @@
         var btn = document.getElementById('btnPlay');
         var epg = document.getElementById('epg');
         var bumper = document.getElementById('bumper');
-        var currentTitle = document.getElementById('currentTitle');
-        var nextTitle = document.getElementById('nextTitle');
+        
+        var indiceActual = 0;
+        if(localStorage.getItem('nativux_index')) {
+            indiceActual = parseInt(localStorage.getItem('nativux_index'));
+        }
 
-        // Configuración de estado
-        var indiceActual = localStorage.getItem('nativux_index') ? parseInt(localStorage.getItem('nativux_index')) : 0;
-        var tiempoGuardado = localStorage.getItem('nativux_time') ? parseFloat(localStorage.getItem('nativux_time')) : 0;
-
-        // LISTA DE VIDEOS CON LINKS CONVERTIDOS
         var listaVideos = [
             { nombre: "Betty Toon - Estrella Estrellada", url: "https://dl.dropboxusercontent.com/scl/fi/cw3grhqcau2uu614oqqsf/y2mate.com-Betty-toon-estrella-estrellada_360p.mp4?rlkey=a5nimez2upz42bp7m871lrx2y" },
             { nombre: "Los Simpsons - Bart y la radio", url: "https://dl.dropboxusercontent.com/scl/fi/4a1kkx6odi9t1mn32j73n/03x13-Bart-y-la-radio.mp4?rlkey=875yipktjp8d5jdcpcdp0nhh7" },
@@ -79,120 +44,103 @@
             { nombre: "Saint Seiya - Alma de Oro", url: "https://dl.dropboxusercontent.com/scl/fi/ifgbbmvnpjn9k4i5btyon/Saint-Seiya-Alma-de-Oro-Serie-Completa-2018_360P.mp4?rlkey=zcy64m0ya1kj4e912al7g0fks" },
             { nombre: "Huella de los Dinosaurios - Cap 2", url: "https://dl.dropboxusercontent.com/scl/fi/cadj7tqhj00iqwvd30f0p/videoplayback-3.mp4?rlkey=5bon3k9e6o87a0tz59aig7je7" },
             { nombre: "Huella de los Dinosaurios - Cap 3", url: "https://dl.dropboxusercontent.com/scl/fi/ooampyjihd25agdt5g8ci/videoplayback-4.mp4?rlkey=jsthdqi06n5ozh6rsc6lgd935" },
-            { nombre: "Kymatica - Geometría Sagrada", url: "https://dl.dropboxusercontent.com/scl/fi/gtib18ryu3ymthp2ne1iw/y2mate.com-Kymatica-Documental-en-Espa-ol-Sin-subtitulos_360p.mp4?rlkey=08j5qctnvxscvl6boy3iittew" },
-            { nombre: "South Park - Cap 1 Temp 1", url: "https://dl.dropboxusercontent.com/scl/fi/2tou4p7kpbhmq9624rsjr/Temp-1-Ep-01.mp4?rlkey=dadln3wnx29ojpgye9yp3j21h" },
-            { nombre: "South Park - Cap 2 Temp 1", url: "https://dl.dropboxusercontent.com/scl/fi/deshqvq136p5tio4citar/Temp-1-Ep-02.mp4?rlkey=5c4g9k27dmr5l1whvnrxuyx8r" },
-            { nombre: "South Park - Cap 3 Temp 1", url: "https://dl.dropboxusercontent.com/scl/fi/clxxo7o5a467gl94rpaxg/Temp-1-Ep-03.mp4?rlkey=txzkicxf7k7ld03jzxbnp3slk" },
-            { nombre: "South Park - Cap 4 Temp 1", url: "https://dl.dropboxusercontent.com/scl/fi/z00rrvf8cez0n0516go9p/Temp-1-Ep-04.mp4?rlkey=uxhimlxsl7xtu50cj761imu00" },
-            { nombre: "South Park - Cap 5 Temp 1", url: "https://dl.dropboxusercontent.com/scl/fi/h18b8geqitb25zxkh5041/Temp-1-Ep-05.mp4?rlkey=hsu6abe0xxp4qh7e1vpec7814" },
-            { nombre: "South Park - Cap 6 Temp 1", url: "https://dl.dropboxusercontent.com/scl/fi/dwxz5q2jwbs18ucm1tj5r/Temp-1-Ep-06.mp4?rlkey=avj1sin5slaohtzis7d9a7vh5" },
-            { nombre: "South Park - Cap 7 Temp 1", url: "https://dl.dropboxusercontent.com/scl/fi/diw1j5uw1is2tefrvy06k/Temp-1-Ep-07.mp4?rlkey=6rhbgwrnufbviqummpi5znrfe" },
-            { nombre: "South Park - Cap 8 Temp 1", url: "https://dl.dropboxusercontent.com/scl/fi/ty6i50xg5mat2v8644tj7/Temp-1-Ep-08.mp4?rlkey=iy898vn3b1bfvc32w79slc6jv" },
-            { nombre: "South Park - Cap 9 Temp 1", url: "https://dl.dropboxusercontent.com/scl/fi/exnbb9dtsglvgjurfr113/Temp-1-Ep-09.mp4?rlkey=w63plha3cwgccfvf830ntyn1y" },
-            { nombre: "South Park - Cap 10 Temp 1", url: "https://dl.dropboxusercontent.com/scl/fi/27lyjdayqcoofqawbzzgj/Temp-1-Ep-10.mp4?rlkey=2iuhpwcjgia3sdrzrkszlj0y6" },
-            { nombre: "South Park - Cap 11 Temp 1", url: "https://dl.dropboxusercontent.com/scl/fi/vg1mi9bak439835htz144/Temp-1-Ep-11.mp4?rlkey=w3a2ztu5jv5fmnz1vmbqfn143" },
-            { nombre: "South Park - Cap 12 Temp 1", url: "https://dl.dropboxusercontent.com/scl/fi/xvmg3e4nqccnp182wivpd/Temp-1-Ep-12.mp4?rlkey=wtmfytjaek2hx9ncotljd5kps" },
-            { nombre: "South Park - Cap 13 Temp 1", url: "https://dl.dropboxusercontent.com/scl/fi/r96kokjdqtkx8rhk3k80w/Temp-1-Ep-13.mp4?rlkey=rgsrppculrgm7xaj63789per4" },
-            { nombre: "South Park - Cap 1 Temp 2", url: "https://dl.dropboxusercontent.com/scl/fi/ceono0f7mb2cw3z96in1k/Temp-2-Ep-01.mp4?rlkey=pxhlwkqsszk76zgwfxwkv71s6" },
-            { nombre: "South Park - Cap 2 Temp 2", url: "https://dl.dropboxusercontent.com/scl/fi/5qd21ktjuo0jyuxhnpzp4/Temp-2-Ep-02.mp4?rlkey=8uxyscxytsf3wdl9z2hotk2lw" },
-            { nombre: "South Park - Cap 3 Temp 2", url: "https://dl.dropboxusercontent.com/scl/fi/9p9ffk5dj7ki6dq9twzgj/Temp-2-Ep-03.mp4?rlkey=6w4cgh6y70cvof41dr6s2msup" },
-            { nombre: "South Park - Cap 4 Temp 2", url: "https://dl.dropboxusercontent.com/scl/fi/i3bask3la6rxuuh2054qm/Temp-2-Ep-04.mp4?rlkey=kjcuhqx8gxbo2lpmybwe3zcq0" },
-            { nombre: "South Park - Cap 5 Temp 2", url: "https://dl.dropboxusercontent.com/scl/fi/u8fablnvzv9m42xatz7z4/Temp-2-Ep-05.mp4?rlkey=j1o3ihzq4fdkzb2f55tpwwe7n" },
-            { nombre: "South Park - Cap 6 Temp 2", url: "https://dl.dropboxusercontent.com/scl/fi/xso2ari8y1zpx29cl8wp8/Temp-2-Ep-06.mp4?rlkey=ko9ioaqbcsndyqg9spgef0ely" },
-            { nombre: "South Park - Cap 7 Temp 2", url: "https://dl.dropboxusercontent.com/scl/fi/0ey4decz2496z6rmx6kx2/Temp-2-Ep-07.mp4?rlkey=z2msn974woagztdqofmfz1pu4" },
-            { nombre: "South Park - Cap 8 Temp 2", url: "https://dl.dropboxusercontent.com/scl/fi/6zjv8t0gjey6c0jmeh4s6/Temp-2-Ep-08.mp4?rlkey=zxargj6t5sl2aclmaydmtmoar" },
-            { nombre: "South Park - Cap 9 Temp 2", url: "https://dl.dropboxusercontent.com/scl/fi/a15tndxdrc5n4ngd4dtle/Temp-2-Ep-09.mp4?rlkey=aksagckuja2m8rc8buz4696fg" },
-            { nombre: "South Park - Cap 10 Temp 2", url: "https://dl.dropboxusercontent.com/scl/fi/1hnb0di6595dmxojklwwl/Temp-2-Ep-10.mp4?rlkey=hm3ex7vyuwcupfy6c89xe7f4e" },
-            { nombre: "South Park - Cap 11 Temp 2", url: "https://dl.dropboxusercontent.com/scl/fi/2j3cpa8bk6tciyuxida6v/Temp-2-Ep-11.mp4?rlkey=j8msdgtex6fu6ehrox61pyh9i" },
-            { nombre: "South Park - Cap 12 Temp 2", url: "https://dl.dropboxusercontent.com/scl/fi/fbts9s7jmnzbj1ou1n46m/Temp-2-Ep-12.mp4?rlkey=n9it71jx7e2y4v88o6e9s3dzm" },
-            { nombre: "South Park - Cap 13 Temp 2", url: "https://dl.dropboxusercontent.com/scl/fi/fjf4dk621ur496iwaknjf/Temp-2-Ep-13.mp4?rlkey=eywvb41277k97toyhre0ft8is" },
+            { nombre: "Kymatica - Documental", url: "https://dl.dropboxusercontent.com/scl/fi/gtib18ryu3ymthp2ne1iw/y2mate.com-Kymatica-Documental-en-Espa-ol-Sin-subtitulos_360p.mp4?rlkey=08j5qctnvxscvl6boy3iittew" },
+            { nombre: "South Park - S01E01", url: "https://dl.dropboxusercontent.com/scl/fi/2tou4p7kpbhmq9624rsjr/Temp-1-Ep-01.mp4?rlkey=dadln3wnx29ojpgye9yp3j21h" },
+            { nombre: "South Park - S01E02", url: "https://dl.dropboxusercontent.com/scl/fi/deshqvq136p5tio4citar/Temp-1-Ep-02.mp4?rlkey=5c4g9k27dmr5l1whvnrxuyx8r" },
+            { nombre: "South Park - S01E03", url: "https://dl.dropboxusercontent.com/scl/fi/clxxo7o5a467gl94rpaxg/Temp-1-Ep-03.mp4?rlkey=txzkicxf7k7ld03jzxbnp3slk" },
+            { nombre: "South Park - S01E04", url: "https://dl.dropboxusercontent.com/scl/fi/z00rrvf8cez0n0516go9p/Temp-1-Ep-04.mp4?rlkey=uxhimlxsl7xtu50cj761imu00" },
+            { nombre: "South Park - S01E05", url: "https://dl.dropboxusercontent.com/scl/fi/h18b8geqitb25zxkh5041/Temp-1-Ep-05.mp4?rlkey=hsu6abe0xxp4qh7e1vpec7814" },
+            { nombre: "South Park - S01E06", url: "https://dl.dropboxusercontent.com/scl/fi/dwxz5q2jwbs18ucm1tj5r/Temp-1-Ep-06.mp4?rlkey=avj1sin5slaohtzis7d9a7vh5" },
+            { nombre: "South Park - S01E07", url: "https://dl.dropboxusercontent.com/scl/fi/diw1j5uw1is2tefrvy06k/Temp-1-Ep-07.mp4?rlkey=6rhbgwrnufbviqummpi5znrfe" },
+            { nombre: "South Park - S01E08", url: "https://dl.dropboxusercontent.com/scl/fi/ty6i50xg5mat2v8644tj7/Temp-1-Ep-08.mp4?rlkey=iy898vn3b1bfvc32w79slc6jv" },
+            { nombre: "South Park - S01E09", url: "https://dl.dropboxusercontent.com/scl/fi/exnbb9dtsglvgjurfr113/Temp-1-Ep-09.mp4?rlkey=w63plha3cwgccfvf830ntyn1y" },
+            { nombre: "South Park - S01E10", url: "https://dl.dropboxusercontent.com/scl/fi/27lyjdayqcoofqawbzzgj/Temp-1-Ep-10.mp4?rlkey=2iuhpwcjgia3sdrzrkszlj0y6" },
+            { nombre: "South Park - S01E11", url: "https://dl.dropboxusercontent.com/scl/fi/vg1mi9bak439835htz144/Temp-1-Ep-11.mp4?rlkey=w3a2ztu5jv5fmnz1vmbqfn143" },
+            { nombre: "South Park - S01E12", url: "https://dl.dropboxusercontent.com/scl/fi/xvmg3e4nqccnp182wivpd/Temp-1-Ep-12.mp4?rlkey=wtmfytjaek2hx9ncotljd5kps" },
+            { nombre: "South Park - S01E13", url: "https://dl.dropboxusercontent.com/scl/fi/r96kokjdqtkx8rhk3k80w/Temp-1-Ep-13.mp4?rlkey=rgsrppculrgm7xaj63789per4" },
+            { nombre: "South Park - S02E01", url: "https://dl.dropboxusercontent.com/scl/fi/ceono0f7mb2cw3z96in1k/Temp-2-Ep-01.mp4?rlkey=pxhlwkqsszk76zgwfxwkv71s6" },
+            { nombre: "South Park - S02E02", url: "https://dl.dropboxusercontent.com/scl/fi/5qd21ktjuo0jyuxhnpzp4/Temp-2-Ep-02.mp4?rlkey=8uxyscxytsf3wdl9z2hotk2lw" },
+            { nombre: "South Park - S02E03", url: "https://dl.dropboxusercontent.com/scl/fi/9p9ffk5dj7ki6dq9twzgj/Temp-2-Ep-03.mp4?rlkey=6w4cgh6y70cvof41dr6s2msup" },
+            { nombre: "South Park - S02E04", url: "https://dl.dropboxusercontent.com/scl/fi/i3bask3la6rxuuh2054qm/Temp-2-Ep-04.mp4?rlkey=kjcuhqx8gxbo2lpmybwe3zcq0" },
+            { nombre: "South Park - S02E05", url: "https://dl.dropboxusercontent.com/scl/fi/u8fablnvzv9m42xatz7z4/Temp-2-Ep-05.mp4?rlkey=j1o3ihzq4fdkzb2f55tpwwe7n" },
+            { nombre: "South Park - S02E06", url: "https://dl.dropboxusercontent.com/scl/fi/xso2ari8y1zpx29cl8wp8/Temp-2-Ep-06.mp4?rlkey=ko9ioaqbcsndyqg9spgef0ely" },
+            { nombre: "South Park - S02E07", url: "https://dl.dropboxusercontent.com/scl/fi/0ey4decz2496z6rmx6kx2/Temp-2-Ep-07.mp4?rlkey=z2msn974woagztdqofmfz1pu4" },
+            { nombre: "South Park - S02E08", url: "https://dl.dropboxusercontent.com/scl/fi/6zjv8t0gjey6c0jmeh4s6/Temp-2-Ep-08.mp4?rlkey=zxargj6t5sl2aclmaydmtmoar" },
+            { nombre: "South Park - S02E09", url: "https://dl.dropboxusercontent.com/scl/fi/a15tndxdrc5n4ngd4dtle/Temp-2-Ep-09.mp4?rlkey=aksagckuja2m8rc8buz4696fg" },
+            { nombre: "South Park - S02E10", url: "https://dl.dropboxusercontent.com/scl/fi/1hnb0di6595dmxojklwwl/Temp-2-Ep-10.mp4?rlkey=hm3ex7vyuwcupfy6c89xe7f4e" },
+            { nombre: "South Park - S02E11", url: "https://dl.dropboxusercontent.com/scl/fi/2j3cpa8bk6tciyuxida6v/Temp-2-Ep-11.mp4?rlkey=j8msdgtex6fu6ehrox61pyh9i" },
+            { nombre: "South Park - S02E12", url: "https://dl.dropboxusercontent.com/scl/fi/fbts9s7jmnzbj1ou1n46m/Temp-2-Ep-12.mp4?rlkey=n9it71jx7e2y4v88o6e9s3dzm" },
+            { nombre: "South Park - S02E13", url: "https://dl.dropboxusercontent.com/scl/fi/fjf4dk621ur496iwaknjf/Temp-2-Ep-13.mp4?rlkey=eywvb41277k97toyhre0ft8is" },
             { nombre: "Los Simpsons - Kampo Krusty", url: "https://dl.dropboxusercontent.com/scl/fi/105xjhkgswyy2ehj0lyqt/04x01-Kampo-Krusty.mp4?rlkey=4zuzsy0verumyl27qrieah2q5" },
             { nombre: "Los Simpsons - Homero hereje", url: "https://dl.dropboxusercontent.com/scl/fi/q3zcbkphdsxu4nvkoebwn/04x03-Homero-hereje.mp4?rlkey=na6bi3kzwql8iinyumiautzzu" },
-            { nombre: "Los Simpsons - Homero va a la universidad", url: "https://dl.dropboxusercontent.com/scl/fi/oq9z8cnt2cya0j3vy6x42/05x03-Homero-va-a-la-universidad.mp4?rlkey=cu5fdlkg3tvaigyzp2xl675v4" },
-            { nombre: "Los Simpsons - Lisa y los deportes", url: "https://dl.dropboxusercontent.com/scl/fi/rjfsnzhibivt1ekt3l8o2/06x08-Lisa-y-los-deportes.mp4?rlkey=1wshdcf5klfcv7mrw04q77tib" },
+            { nombre: "Los Simpsons - Universidad", url: "https://dl.dropboxusercontent.com/scl/fi/oq9z8cnt2cya0j3vy6x42/05x03-Homero-va-a-la-universidad.mp4?rlkey=cu5fdlkg3tvaigyzp2xl675v4" },
+            { nombre: "Los Simpsons - Lisa y deportes", url: "https://dl.dropboxusercontent.com/scl/fi/rjfsnzhibivt1ekt3l8o2/06x08-Lisa-y-los-deportes.mp4?rlkey=1wshdcf5klfcv7mrw04q77tib" },
             { nombre: "Los Simpsons - El cometa de Bart", url: "https://dl.dropboxusercontent.com/scl/fi/8f22zydnr2srey2bsx0ku/06x14-El-cometa-de-Bart.mp4?rlkey=so3uzipx4fdavf4hmd3fgp3fb" },
-            { nombre: "Gandahar, Los años luz", url: "https://dl.dropboxusercontent.com/scl/fi/6zj62w2h7am51j78j3685/y2mate.com-Gandahar-Los-A-os-Luz-Ciencia-Ficci-n-Sub-Espa-ol_480p.mp4?rlkey=79gphed41qdd5z7w84sxgksvj" },
-            { nombre: "Saint Seiya, Torneo Galáctico", url: "https://dl.dropboxusercontent.com/scl/fi/dkaps4xshtw6i0muyeupz/Caballeros-del-Zod-aco-1986_480p.mp4?rlkey=uoxvg0ubx3ceza7xroh8ypgmg" },
-            { nombre: "Hellraiser 1, Puerta al infierno", url: "https://dl.dropboxusercontent.com/scl/fi/3v5e9qo0qg5fj0t9nbewa/Hellraiser_-Puerta-del-Infierno-_-PEL-CULA-COMPLETA-DE-TERROR-_-NetMovies-en-Espa-ol.mp4?rlkey=s357dbim6u91vcmqhqcxjgsoh" },
-            { nombre: "Kung pow, Enter the fist", url: "https://dl.dropboxusercontent.com/scl/fi/5pr2l6hzo2z23w3isemyn/KUNG-POW-ENTER-THE-FIST-LATINO.mp4?rlkey=y758dhmxvoovqy5kodc4f5b47" },
-            { nombre: "The comic, Sobre Moebius", url: "https://dl.dropboxusercontent.com/scl/fi/0x67yd4wbza13yxqtltdh/y2mate.com-COMIC-DOCUMENTAL-SOBRE-MOEBIUS_480p.mp4?rlkey=yu12u8ksbew67wtadnmysttxn" },
-            { nombre: "Regreso al Planeta de los Simios", url: "https://dl.dropboxusercontent.com/scl/fi/m4qb2k93go6cegp8vxw8l/Y2meta.app-Regreso-al-planeta-de-los-simios-La-SERIE-COMPLETA-en-Castellano-1975-480p.mp4?rlkey=fzgasq7y7voiax05283d74y55" },
-            { nombre: "Max Romeo - Chase the devil", url: "https://dl.dropboxusercontent.com/scl/fi/sjxmxl2hw9xaafi09t5b9/y2mate.com-Max-Romeo-Chase-The-Devil-HD_480p.mp4?rlkey=z214emv55g0qg2m0nzmuc4vo7" },
+            { nombre: "Gandahar - Película", url: "https://dl.dropboxusercontent.com/scl/fi/6zj62w2h7am51j78j3685/y2mate.com-Gandahar-Los-A-os-Luz-Ciencia-Ficci-n-Sub-Espa-ol_480p.mp4?rlkey=79gphed41qdd5z7w84sxgksvj" },
+            { nombre: "Saint Seiya - 1986", url: "https://dl.dropboxusercontent.com/scl/fi/dkaps4xshtw6i0muyeupz/Caballeros-del-Zod-aco-1986_480p.mp4?rlkey=uoxvg0ubx3ceza7xroh8ypgmg" },
+            { nombre: "Hellraiser 1", url: "https://dl.dropboxusercontent.com/scl/fi/3v5e9qo0qg5fj0t9nbewa/Hellraiser_-Puerta-del-Infierno-_-PEL-CULA-COMPLETA-DE-TERROR-_-NetMovies-en-Espa-ol.mp4?rlkey=s357dbim6u91vcmqhqcxjgsoh" },
+            { nombre: "Kung Pow", url: "https://dl.dropboxusercontent.com/scl/fi/5pr2l6hzo2z23w3isemyn/KUNG-POW-ENTER-THE-FIST-LATINO.mp4?rlkey=y758dhmxvoovqy5kodc4f5b47" },
+            { nombre: "Documental Moebius", url: "https://dl.dropboxusercontent.com/scl/fi/0x67yd4wbza13yxqtltdh/y2mate.com-COMIC-DOCUMENTAL-SOBRE-MOEBIUS_480p.mp4?rlkey=yu12u8ksbew67wtadnmysttxn" },
+            { nombre: "El Planeta de los Simios", url: "https://dl.dropboxusercontent.com/scl/fi/m4qb2k93go6cegp8vxw8l/Y2meta.app-Regreso-al-planeta-de-los-simios-La-SERIE-COMPLETA-en-Castellano-1975-480p.mp4?rlkey=fzgasq7y7voiax05283d74y55" },
+            { nombre: "Max Romeo", url: "https://dl.dropboxusercontent.com/scl/fi/sjxmxl2hw9xaafi09t5b9/y2mate.com-Max-Romeo-Chase-The-Devil-HD_480p.mp4?rlkey=z214emv55g0qg2m0nzmuc4vo7" },
             { nombre: "Michael Jackson - Billy Jean", url: "https://dl.dropboxusercontent.com/scl/fi/vn3jloyixdie3hkuuwmif/y2mate.com-Michael-Jackson-Billie-Jean-Official-Video_480p.mp4?rlkey=0nx4pr58ke8u12u1eb0yf7k3q" },
-            { nombre: "Chaka demus - Murder she wrote", url: "https://dl.dropboxusercontent.com/scl/fi/wnw1a08krq0dr7uo72hmh/y2mate.com-Murder-She-Wrote-Chaka-Demus-and-Pliers_360p.mp4?rlkey=3x7wwcjoq7an8wpib6un0htxw" },
-            { nombre: "Mr. Easy - Nuttin nuh go so", url: "https://dl.dropboxusercontent.com/scl/fi/bo0y3bxua4n991xqdn7by/y2mate.com-Nuttin-Nuh-Go-So_480p.mp4?rlkey=mpbnbbji91vvet3xi1srojkxf" },
+            { nombre: "Chaka Demus", url: "https://dl.dropboxusercontent.com/scl/fi/wnw1a08krq0dr7uo72hmh/y2mate.com-Murder-She-Wrote-Chaka-Demus-and-Pliers_360p.mp4?rlkey=3x7wwcjoq7an8wpib6un0htxw" },
+            { nombre: "Mr. Easy", url: "https://dl.dropboxusercontent.com/scl/fi/bo0y3bxua4n991xqdn7by/y2mate.com-Nuttin-Nuh-Go-So_480p.mp4?rlkey=mpbnbbji91vvet3xi1srojkxf" },
             { nombre: "Outkast - Hey Ya", url: "https://dl.dropboxusercontent.com/scl/fi/2748q4bv3pyeorzj2ztqe/y2mate.com-Outkast-Hey-Ya-Official-HD-Video_480p.mp4?rlkey=wgze0q369gt8sk6zbx2ueaweu" },
-            { nombre: "Protoje - Who knows", url: "https://dl.dropboxusercontent.com/scl/fi/u38j74onm6dq5g0328jp7/y2mate.com-Protoje-Who-Knows-ft-Chronixx-Official-Music-Video_480p.mp4?rlkey=nyymetwsi4t6xsi7ssq346750" },
-            { nombre: "Ras Muhammad - Salam", url: "https://dl.dropboxusercontent.com/scl/fi/wisplvfb9k0b5dvox4891/y2mate.com-Ras-Muhamad-Salam-Official-Video-2015_480p.mp4?rlkey=tj8og0a2kqako06gd9islud1x" },
-            { nombre: "Rockwell - Somebody is watching me", url: "https://dl.dropboxusercontent.com/scl/fi/kl3julfqkf866o5mez7uh/y2mate.com-Rockwell-Somebodys-Watching-Me-Official-Music-Video_480p.mp4?rlkey=itg7h6ieus6e1xc5gpp5oi3v6" },
-            { nombre: "Run DMC ft. Aerosmith - Walk this way", url: "https://dl.dropboxusercontent.com/scl/fi/9gmxv7kt28i8scjj4c20u/y2mate.com-RUN-DMC-Walk-This-Way-Official-HD-Video-ft-Aerosmith_480p.mp4?rlkey=a4mxul9qp4s08n8c8k9r6y89t" },
-            { nombre: "Sean paul - like glue", url: "https://dl.dropboxusercontent.com/scl/fi/vnax8kxexgtcms13fxikb/y2mate.com-Sean-Paul-Like-Glue-Lyrics-HD_480p.mp4?rlkey=vyyt1q0pd33qky8cq1fjsynin" },
-            { nombre: "Shaggy ft. Chronnix - Bridges", url: "https://dl.dropboxusercontent.com/scl/fi/7xp5tcgu1dtd77uu8w7vs/y2mate.com-Shaggy-Bridges-ft-Chronixx-Official-Video_480p.mp4?rlkey=cuut9l3haxupdfqsyyepmqbu7" },
+            { nombre: "Protoje - Who Knows", url: "https://dl.dropboxusercontent.com/scl/fi/u38j74onm6dq5g0328jp7/y2mate.com-Protoje-Who-Knows-ft-Chronixx-Official-Music-Video_480p.mp4?rlkey=nyymetwsi4t6xsi7ssq346750" },
+            { nombre: "Ras Muhammad", url: "https://dl.dropboxusercontent.com/scl/fi/wisplvfb9k0b5dvox4891/y2mate.com-Ras-Muhamad-Salam-Official-Video-2015_480p.mp4?rlkey=tj8og0a2kqako06gd9islud1x" },
+            { nombre: "Rockwell", url: "https://dl.dropboxusercontent.com/scl/fi/kl3julfqkf866o5mez7uh/y2mate.com-Rockwell-Somebodys-Watching-Me-Official-Music-Video_480p.mp4?rlkey=itg7h6ieus6e1xc5gpp5oi3v6" },
+            { nombre: "Run DMC - Aerosmith", url: "https://dl.dropboxusercontent.com/scl/fi/9gmxv7kt28i8scjj4c20u/y2mate.com-RUN-DMC-Walk-This-Way-Official-HD-Video-ft-Aerosmith_480p.mp4?rlkey=a4mxul9qp4s08n8c8k9r6y89t" },
+            { nombre: "Sean Paul", url: "https://dl.dropboxusercontent.com/scl/fi/vnax8kxexgtcms13fxikb/y2mate.com-Sean-Paul-Like-Glue-Lyrics-HD_480p.mp4?rlkey=vyyt1q0pd33qky8cq1fjsynin" },
+            { nombre: "Shaggy", url: "https://dl.dropboxusercontent.com/scl/fi/7xp5tcgu1dtd77uu8w7vs/y2mate.com-Shaggy-Bridges-ft-Chronixx-Official-Video_480p.mp4?rlkey=cuut9l3haxupdfqsyyepmqbu7" },
             { nombre: "Snow - Informer", url: "https://dl.dropboxusercontent.com/scl/fi/gg3l545my91ivfzs81jnx/y2mate.com-Snow-Informer-Official-Music-Video_480p.mp4?rlkey=a1uws4srptdsauja6ycoygpei" },
-            { nombre: "Jacksons five - Blame it to the boogie", url: "https://dl.dropboxusercontent.com/scl/fi/0vzcl3p8jrc8hiwfq040k/y2mate.com-The-Jacksons-Blame-It-On-the-Boogie-Official-Video_360p.mp4?rlkey=i0juxdwr4fd3uivqolbzhk82y" },
+            { nombre: "Jacksons Five", url: "https://dl.dropboxusercontent.com/scl/fi/0vzcl3p8jrc8hiwfq040k/y2mate.com-The-Jacksons-Blame-It-On-the-Boogie-Official-Video_360p.mp4?rlkey=i0juxdwr4fd3uivqolbzhk82y" },
             { nombre: "Betty Toon - SuperBici", url: "https://dl.dropboxusercontent.com/scl/fi/atyiu9nj44zkduseem692/y2mate.com-Betty-Toons-La-super-bici_360p.mp4?rlkey=xo4y6n2yrvisb0qv2ed1zq81v" },
-            { nombre: "Gato con Botas - Hayao Miyazaki", url: "https://dl.dropboxusercontent.com/scl/fi/546naezitkyqqz5ox14q4/EL-GATO-CON-BOTAS-Hayao-Miyasaki-Espa-ol-Latino_480p.mp4?rlkey=w6xkh7k6gyucqxvhgbxi882e9" }
+            { nombre: "Gato con Botas", url: "https://dl.dropboxusercontent.com/scl/fi/546naezitkyqqz5ox14q4/EL-GATO-CON-BOTAS-Hayao-Miyasaki-Espa-ol-Latino_480p.mp4?rlkey=w6xkh7k6gyucqxvhgbxi882e9" }
         ];
 
-        function cargarVideo(indice, startTime) {
-            var videoInfo = listaVideos[indice];
-            var proximo = listaVideos[(indice + 1) % listaVideos.length];
+        function playNext() {
+            indiceActual = (indiceActual + 1) % listaVideos.length;
+            localStorage.setItem('nativux_index', indiceActual);
             
-            // Actualizar interfaz
-            currentTitle.innerHTML = videoInfo.nombre;
-            nextTitle.innerHTML = "Siguiente: " + proximo.nombre;
-            
-            // Cargar archivo
-            player.src = videoInfo.url;
-            player.load();
-
-            player.onloadedmetadata = function() {
-                if (startTime > 0) { player.currentTime = startTime; }
-                player.play();
-                
-                // Mostrar info del video por 6 segundos
-                epg.style.display = 'block';
-                setTimeout(function() { epg.style.display = 'none'; }, 6000);
-            };
+            bumper.style.display = 'flex';
+            setTimeout(function() {
+                loadVideo(indiceActual);
+                bumper.style.display = 'none';
+            }, 3000);
         }
 
-        // Al presionar el botón de inicio
+        function loadVideo(index) {
+            var v = listaVideos[index];
+            var nextV = listaVideos[(index + 1) % listaVideos.length];
+            
+            document.getElementById('currentTitle').innerHTML = v.nombre;
+            document.getElementById('nextTitle').innerHTML = "Siguiente: " + nextV.nombre;
+            
+            player.src = v.url;
+            player.load();
+            player.play();
+            
+            epg.style.display = 'block';
+            setTimeout(function() { epg.style.display = 'none'; }, 6000);
+        }
+
         btn.onclick = function() {
             btn.style.display = 'none';
-            player.muted = false;
-            cargarVideo(indiceActual, tiempoGuardado);
+            loadVideo(indiceActual);
         };
 
-        // EVENTO CLAVE: CUANDO TERMINA UN VIDEO
         player.onended = function() {
-            // 1. Calcular el siguiente índice
-            indiceActual = (indiceActual + 1) % listaVideos.length;
-            
-            // 2. Guardar progreso (video nuevo, tiempo 0)
-            localStorage.setItem('nativux_index', indiceActual);
-            localStorage.setItem('nativux_time', 0);
-            
-            // 3. Mostrar cortinilla de "Sintonizando"
-            bumper.style.display = 'flex';
-            
-            // 4. Esperar 3 segundos y cargar el siguiente
-            setTimeout(function() {
-                cargarVideo(indiceActual, 0);
-                setTimeout(function() { bumper.style.display = 'none'; }, 1000);
-            }, 3000);
+            playNext();
         };
 
-        // Guardado constante del tiempo actual
-        player.ontimeupdate = function() { 
-            if (!player.seeking) {
-                localStorage.setItem('nativux_index', indiceActual);
-                localStorage.setItem('nativux_time', player.currentTime);
-            }
+        // Si hay error en el video, saltar al siguiente automáticamente
+        player.onerror = function() {
+            console.log("Error de carga, saltando...");
+            playNext();
         };
 
-        // Bloqueo de menú contextual para evitar distracciones en TV
         document.oncontextmenu = function() { return false; };
-
     </script>
 </body>
 </html>
